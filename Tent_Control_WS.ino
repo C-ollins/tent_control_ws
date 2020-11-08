@@ -4,6 +4,7 @@
 #include <Hash.h>
 #include <DHT.h>
 
+#define VENT_RELAY_PIN D5
 #define LIGHT_RELAY_PIN D4
 // DHT sensor type & pin
 #define DHTPIN D1
@@ -16,7 +17,7 @@
 #define LUX_CALC_EXPONENT -1.405
 
 DHT dht(DHTPIN, DHTTYPE);
-unsigned long previousMillis = 0; // will store last time DHT was updated
+unsigned long previousMillis = 0; // will store last time sensor readings were updated
 
 // Updates DHT readings every 10 seconds
 const long interval = 5000;
@@ -67,10 +68,12 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
     else if (text == "venton")
     {
       ventRelay = 1;
+      digitalWrite(VENT_RELAY_PIN, LOW);
     }
     else if (text == "ventoff")
     {
       ventRelay = 0;
+      digitalWrite(VENT_RELAY_PIN, HIGH);
     }
 
     broadcastData();
@@ -107,6 +110,7 @@ void setup()
   WiFi.begin(ssid, password);
 
   pinMode(LIGHT_RELAY_PIN, OUTPUT);
+  pinMode(VENT_RELAY_PIN, OUTPUT);
 
   while (WiFi.status() != WL_CONNECTED)
   {
@@ -118,6 +122,7 @@ void setup()
   webSocket.onEvent(webSocketEvent);
 
   digitalWrite(LIGHT_RELAY_PIN, HIGH);
+  digitalWrite(VENT_RELAY_PIN, HIGH);
 }
 
 void loop()
